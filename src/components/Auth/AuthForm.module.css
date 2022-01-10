@@ -51,6 +51,7 @@
   border: 1px solid #9f5ccc;
   border-radius: 4px;
   padding: 0.5rem 2.5rem;
+  width: 20rem;
 }
 
 .actions button:hover {
@@ -69,4 +70,8 @@
 .actions .toggle:hover {
   background-color: transparent;
   color: #ae82cc;
+}
+
+.error {
+  color: coral;
 }
