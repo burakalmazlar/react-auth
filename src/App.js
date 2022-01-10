@@ -28,8 +28,8 @@ const setLogoutTimer = (logout) => {
 }
 
 function App() {
-    const {auth, login, logout} = useAuth();
-    const {token, loggedIn} = auth;
+    const {auth, logout} = useAuth();
+    const {loggedIn} = auth;
 
     useEffect(() => {
         setLogoutTimer(logout);

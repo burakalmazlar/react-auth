@@ -11,7 +11,6 @@ const ProfileForm = () => {
 
     const {auth, login} = useAuth();
 
-    const {loggedIn} = auth;
     useEffect(() => {
         if (passwordChanged) {
             navigate("/", {replace: true})
@@ -21,7 +20,7 @@ const ProfileForm = () => {
     const onSubmit = async (e) => {
         e.preventDefault();
 
-        const response = await fetch("http://localhost:8080/change-password", {
+        const response = await fetch("http://localhost:8080/user/change-password", {
             method: "POST", body: JSON.stringify({
                 password: newPasswordRef.current.value
             }),
@@ -33,7 +32,6 @@ const ProfileForm = () => {
         })
         const data = await response.json();
         if (response.ok) {
-            login(data.token,data.expiresIn);
             setPasswordChanged(true);
         } else {
             console.log(data.error)

@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 COPY public/ ./public
 COPY src/ ./src
-COPY package.json ./
+COPY package.json .env.development .env.production ./
 
 ENV NODE_OPTIONS=--openssl-legacy-provider
 

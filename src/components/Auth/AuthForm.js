@@ -1,8 +1,7 @@
-import {useState, useRef, useEffect} from 'react';
-
+import {useState, useEffect} from 'react';
+import {useNavigate} from "react-router-dom"
 import classes from './AuthForm.module.css';
 import useAuth from "../../hooks/use-auth";
-import {useNavigate} from "react-router-dom"
 
 const AuthForm = () => {
     const navigate = useNavigate();
@@ -17,32 +16,22 @@ const AuthForm = () => {
         }
     }, [loggedIn, navigate])
 
-    const emailRef = useRef();
-    const passwordRef = useRef();
-
     const switchAuthModeHandler = () => {
         setIsLogin((prevState) => !prevState);
     };
 
-    const onSubmit = async (e) => {
+    const onSubmit = (e) => {
         e.preventDefault();
 
         const url = isLogin ? "authenticate" : "register"
 
-        const response = await fetch("http://localhost:8080/" + url, {
-            method: "POST", body: JSON.stringify({
-                username: emailRef.current.value,
-                password: passwordRef.current.value
-            }),
-            mode: 'cors',
-            headers: {"Content-Type": "application/json"}
+        const response = fetch("http://localhost:8080/auth/" + url, {
+            method: 'POST',
+            body: new FormData(e.target)
         })
-        const data = await response.json();
-        if (response.ok) {
-            login(data.token,data.expiresIn);
-        } else {
-            console.log(data.error)
-        }
+            .then(response => response.json())
+            .then(result => login(result.token, result.expires))
+            .catch(error => console.log('error', error));
 
     }
 
@@ -51,12 +40,12 @@ const AuthForm = () => {
             <h1>{isLogin ? 'Login' : 'Sign Up'}</h1>
             <form onSubmit={onSubmit}>
                 <div className={classes.control}>
-                    <label htmlFor='email'>Your Email</label>
-                    <input type='text' id='email' required ref={emailRef}/>
+                    <label htmlFor='username'>Your Username</label>
+                    <input type='text' id='username' name="username" required/>
                 </div>
                 <div className={classes.control}>
                     <label htmlFor='password'>Your Password</label>
-                    <input type='password' id='password' required ref={passwordRef}/>
+                    <input type='password' id='password' name="password" required/>
                 </div>
                 <div className={classes.actions}>
                     <button>{isLogin ? 'Login' : 'Create Account'}</button>

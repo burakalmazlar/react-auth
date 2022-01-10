@@ -1,0 +1,56 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Bump version and push tag
+        id: autotag
+        uses: anothrNick/github-tag-action@1.36.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.autotag.outputs.new_tag }}
+          release_name: ${{ steps.autotag.outputs.new_tag }}
+          draft: false
+          prerelease: false
+
+      - name: Build & Push Docker Image to Docker Hub
+        uses: mr-smithers-excellent/docker-build-push@v5
+        with:
+          directory: ${{ github.workspace }}
+          dockerfile: ${{ github.workspace }}/Dockerfile
+          image: burakalmazlar/react01
+          tags: ${{ steps.autotag.outputs.new_tag }}, latest
+          registry: docker.io
+          buildArgs: REVISION=${{ steps.autotag.outputs.new_tag }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Run docker container on AWS
+        uses: ironhalik/docker-over-ssh-action@v1
+        with:
+          user: ec2-user
+          host: ${{ secrets.AWS_HOST }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker system prune --all --force --volumes
+            export CNT=$(docker container ls --filter name=react01 --format '{{.Names}}')
+            if [ $CNT == "react01" ]; then docker container rm -f react01; fi
+            docker container run -d -p 3001:80 --name react01 burakalmazlar/react01:${{ steps.autotag.outputs.new_tag }}
