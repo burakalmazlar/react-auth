@@ -25,7 +25,7 @@ const AuthForm = () => {
 
         const url = isLogin ? "authenticate" : "register"
 
-        const response = fetch("http://localhost:8080/auth/" + url, {
+        const response = fetch(process.env.REACT_APP_DOMAIN + "/auth/" + url, {
             method: 'POST',
             body: new FormData(e.target)
         })

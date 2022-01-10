@@ -20,7 +20,7 @@ const ProfileForm = () => {
     const onSubmit = async (e) => {
         e.preventDefault();
 
-        const response = await fetch("http://localhost:8080/user/change-password", {
+        const response = await fetch(process.env.REACT_APP_DOMAIN + "/user/change-password", {
             method: "POST", body: JSON.stringify({
                 password: newPasswordRef.current.value
             }),
